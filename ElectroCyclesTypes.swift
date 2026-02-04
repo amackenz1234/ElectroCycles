@@ -19,19 +19,3 @@ public typealias AppFavoritesStore = ElectroCyclesFavoritesStore
 public typealias AppBike = Bike
 public typealias AppCartItem = CartItem
 
-// Make sure the classes can see each other
-extension ElectroCyclesCartStore {
-    // Ensure this class is properly accessible
-}
-
-extension ElectroCyclesFavoritesStore {
-    // Ensure this class is properly accessible  
-}
-
-extension Bike {
-    // Ensure this struct is properly accessible
-}
-
-extension CartItem {
-    // Ensure this struct is properly accessible
-}
