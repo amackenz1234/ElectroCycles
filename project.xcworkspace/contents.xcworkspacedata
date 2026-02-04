@@ -4,16 +4,4 @@
    <FileRef
       location = "self:">
    </FileRef>
-   <FileRef
-      location = "group:CartStore.swift">
-   </FileRef>
-   <FileRef
-      location = "group:FavoritesStore.swift">
-   </FileRef>
-   <FileRef
-      location = "group:ElectroCyclesTypes.swift">
-   </FileRef>
-   <FileRef
-      location = "group:AppModels.swift">
-   </FileRef>
 </Workspace>
