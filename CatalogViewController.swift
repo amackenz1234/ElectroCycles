@@ -34,32 +34,72 @@ final class CatalogViewController: UIViewController {
         title = "Electro Cycles"
         navigationController?.navigationBar.prefersLargeTitles = true
 
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
+        let searchButton = UIBarButtonItem(
+            image: UIImage(systemName: "magnifyingglass"),
+            style: .plain,
+            target: self,
+            action: #selector(showSearch)
+        )
+        let infoButton = UIBarButtonItem(
             image: UIImage(systemName: "info.circle"),
             style: .plain,
             target: self,
             action: #selector(showWhatsNew)
         )
+        navigationItem.rightBarButtonItems = [infoButton, searchButton]
     }
 
     private static func createLayout() -> UICollectionViewLayout {
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(0.5),
-            heightDimension: .estimated(280)
-        )
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+        return UICollectionViewCompositionalLayout { sectionIndex, _ in
+            if sectionIndex == 0 {
+                // Banner section
+                let itemSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .absolute(160)
+                )
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(280)
-        )
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item, item])
+                let groupSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .absolute(160)
+                )
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
-        let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+                let section = NSCollectionLayoutSection(group: group)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+                return section
+            } else {
+                // Products grid section
+                let itemSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(0.5),
+                    heightDimension: .estimated(300)
+                )
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                item.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 6, bottom: 6, trailing: 6)
 
-        return UICollectionViewCompositionalLayout(section: section)
+                let groupSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .estimated(300)
+                )
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item, item])
+
+                let section = NSCollectionLayoutSection(group: group)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 10, bottom: 20, trailing: 10)
+
+                let headerSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .absolute(50)
+                )
+                let header = NSCollectionLayoutBoundarySupplementaryItem(
+                    layoutSize: headerSize,
+                    elementKind: UICollectionView.elementKindSectionHeader,
+                    alignment: .top
+                )
+                section.boundarySupplementaryItems = [header]
+
+                return section
+            }
+        }
     }
 
     private func setupCollectionView() {
@@ -69,6 +109,12 @@ final class CatalogViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(BikeCell.self, forCellWithReuseIdentifier: BikeCell.reuseIdentifier)
+        collectionView.register(BannerCell.self, forCellWithReuseIdentifier: BannerCell.reuseIdentifier)
+        collectionView.register(
+            SectionHeader.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: SectionHeader.reuseIdentifier
+        )
 
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -88,16 +134,36 @@ final class CatalogViewController: UIViewController {
         let navController = UINavigationController(rootViewController: whatsNewVC)
         present(navController, animated: true)
     }
+
+    @objc private func showSearch() {
+        let alert = UIAlertController(title: "Search", message: "Search functionality coming soon!", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
 }
 
 // MARK: - UICollectionViewDataSource
 
 extension CatalogViewController: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return bikes.count
+        return section == 0 ? 1 : bikes.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if indexPath.section == 0 {
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: BannerCell.reuseIdentifier,
+                for: indexPath
+            ) as? BannerCell else {
+                return UICollectionViewCell()
+            }
+            return cell
+        }
+
         guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: BikeCell.reuseIdentifier,
             for: indexPath
@@ -109,15 +175,154 @@ extension CatalogViewController: UICollectionViewDataSource {
         cell.configure(with: bike)
         return cell
     }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader else {
+            return UICollectionReusableView()
+        }
+
+        guard let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: SectionHeader.reuseIdentifier,
+            for: indexPath
+        ) as? SectionHeader else {
+            return UICollectionReusableView()
+        }
+
+        header.configure(title: "Featured E-Bikes")
+        return header
+    }
 }
 
 // MARK: - UICollectionViewDelegate
 
 extension CatalogViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard indexPath.section == 1 else { return }
         let bike = bikes[indexPath.item]
         let detailVC = BikeDetailViewController(bike: bike)
         navigationController?.pushViewController(detailVC, animated: true)
+    }
+}
+
+// MARK: - Banner Cell
+
+final class BannerCell: UICollectionViewCell {
+    static let reuseIdentifier = "BannerCell"
+
+    private let gradientLayer = CAGradientLayer()
+    private let titleLabel = UILabel()
+    private let subtitleLabel = UILabel()
+    private let iconView = UIImageView()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupCell()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gradientLayer.frame = contentView.bounds
+    }
+
+    private func setupCell() {
+        contentView.layer.cornerRadius = 20
+        contentView.clipsToBounds = true
+
+        // Gradient background
+        gradientLayer.colors = [
+            UIColor.systemRed.cgColor,
+            UIColor.systemRed.withAlphaComponent(0.7).cgColor
+        ]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
+        contentView.layer.insertSublayer(gradientLayer, at: 0)
+
+        // Icon
+        iconView.image = UIImage(systemName: "bicycle")
+        iconView.tintColor = .white.withAlphaComponent(0.3)
+        iconView.contentMode = .scaleAspectFit
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(iconView)
+
+        // Title
+        titleLabel.text = "Spring Sale"
+        titleLabel.font = .systemFont(ofSize: 28, weight: .bold)
+        titleLabel.textColor = .white
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(titleLabel)
+
+        // Subtitle
+        subtitleLabel.text = "Up to 20% off on select e-bikes"
+        subtitleLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        subtitleLabel.textColor = .white.withAlphaComponent(0.9)
+        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(subtitleLabel)
+
+        NSLayoutConstraint.activate([
+            iconView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: 20),
+            iconView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            iconView.widthAnchor.constraint(equalToConstant: 140),
+            iconView.heightAnchor.constraint(equalToConstant: 140),
+
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 32),
+            titleLabel.trailingAnchor.constraint(equalTo: iconView.leadingAnchor, constant: -16),
+
+            subtitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            subtitleLabel.trailingAnchor.constraint(equalTo: iconView.leadingAnchor, constant: -16)
+        ])
+    }
+}
+
+// MARK: - Section Header
+
+final class SectionHeader: UICollectionReusableView {
+    static let reuseIdentifier = "SectionHeader"
+
+    private let titleLabel = UILabel()
+    private let seeAllButton = UIButton(type: .system)
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupView()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setupView() {
+        titleLabel.font = .systemFont(ofSize: 22, weight: .bold)
+        titleLabel.textColor = .label
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(titleLabel)
+
+        seeAllButton.setTitle("See All", for: .normal)
+        seeAllButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        seeAllButton.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(seeAllButton)
+
+        NSLayoutConstraint.activate([
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 6),
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+
+            seeAllButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+            seeAllButton.centerYAnchor.constraint(equalTo: centerYAnchor)
+        ])
+    }
+
+    func configure(title: String) {
+        titleLabel.text = title
     }
 }
 
@@ -127,10 +332,13 @@ final class BikeCell: UICollectionViewCell {
     static let reuseIdentifier = "BikeCell"
 
     private let containerView = UIView()
+    private let imageContainerView = UIView()
     private let imageView = UIImageView()
     private let nameLabel = UILabel()
+    private let descriptionLabel = UILabel()
     private let priceLabel = UILabel()
     private let favoriteButton = UIButton(type: .system)
+    private let addToCartButton = UIButton(type: .system)
 
     private var currentBike: Bike?
 
@@ -146,38 +354,66 @@ final class BikeCell: UICollectionViewCell {
     private func setupCell() {
         // Container
         containerView.backgroundColor = .systemBackground
-        containerView.layer.cornerRadius = 16
+        containerView.layer.cornerRadius = 20
         containerView.layer.shadowColor = UIColor.black.cgColor
-        containerView.layer.shadowOpacity = 0.1
-        containerView.layer.shadowOffset = CGSize(width: 0, height: 2)
-        containerView.layer.shadowRadius = 8
+        containerView.layer.shadowOpacity = 0.08
+        containerView.layer.shadowOffset = CGSize(width: 0, height: 4)
+        containerView.layer.shadowRadius = 12
         containerView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(containerView)
+
+        // Image container with gradient
+        imageContainerView.backgroundColor = .systemGray6
+        imageContainerView.layer.cornerRadius = 16
+        imageContainerView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(imageContainerView)
 
         // Image
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = .systemRed
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.addSubview(imageView)
+        imageContainerView.addSubview(imageView)
+
+        // Favorite button
+        favoriteButton.tintColor = .systemRed
+        favoriteButton.backgroundColor = .systemBackground
+        favoriteButton.layer.cornerRadius = 16
+        favoriteButton.layer.shadowColor = UIColor.black.cgColor
+        favoriteButton.layer.shadowOpacity = 0.1
+        favoriteButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+        favoriteButton.layer.shadowRadius = 4
+        favoriteButton.translatesAutoresizingMaskIntoConstraints = false
+        favoriteButton.addTarget(self, action: #selector(toggleFavorite), for: .touchUpInside)
+        containerView.addSubview(favoriteButton)
 
         // Name
         nameLabel.font = .systemFont(ofSize: 16, weight: .semibold)
         nameLabel.textColor = .label
-        nameLabel.numberOfLines = 2
+        nameLabel.numberOfLines = 1
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(nameLabel)
 
+        // Description
+        descriptionLabel.font = .systemFont(ofSize: 12)
+        descriptionLabel.textColor = .secondaryLabel
+        descriptionLabel.numberOfLines = 2
+        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(descriptionLabel)
+
         // Price
         priceLabel.font = .systemFont(ofSize: 18, weight: .bold)
-        priceLabel.textColor = .systemGreen
+        priceLabel.textColor = .systemRed
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(priceLabel)
 
-        // Favorite button
-        favoriteButton.tintColor = .systemRed
-        favoriteButton.translatesAutoresizingMaskIntoConstraints = false
-        favoriteButton.addTarget(self, action: #selector(toggleFavorite), for: .touchUpInside)
-        containerView.addSubview(favoriteButton)
+        // Add to cart button
+        addToCartButton.setImage(UIImage(systemName: "cart.badge.plus"), for: .normal)
+        addToCartButton.tintColor = .white
+        addToCartButton.backgroundColor = .systemRed
+        addToCartButton.layer.cornerRadius = 16
+        addToCartButton.translatesAutoresizingMaskIntoConstraints = false
+        addToCartButton.addTarget(self, action: #selector(addToCart), for: .touchUpInside)
+        containerView.addSubview(addToCartButton)
 
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -185,30 +421,44 @@ final class BikeCell: UICollectionViewCell {
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
 
-            imageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
-            imageView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            imageView.widthAnchor.constraint(equalToConstant: 80),
-            imageView.heightAnchor.constraint(equalToConstant: 80),
+            imageContainerView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
+            imageContainerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
+            imageContainerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+            imageContainerView.heightAnchor.constraint(equalToConstant: 120),
 
-            favoriteButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
-            favoriteButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+            imageView.centerXAnchor.constraint(equalTo: imageContainerView.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: imageContainerView.centerYAnchor),
+            imageView.widthAnchor.constraint(equalToConstant: 70),
+            imageView.heightAnchor.constraint(equalToConstant: 70),
+
+            favoriteButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
+            favoriteButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             favoriteButton.widthAnchor.constraint(equalToConstant: 32),
             favoriteButton.heightAnchor.constraint(equalToConstant: 32),
 
-            nameLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 12),
+            nameLabel.topAnchor.constraint(equalTo: imageContainerView.bottomAnchor, constant: 12),
             nameLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
             nameLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
 
-            priceLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
+            descriptionLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
+            descriptionLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
+            descriptionLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+
+            priceLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 8),
             priceLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
-            priceLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
-            priceLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -16)
+            priceLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -12),
+
+            addToCartButton.centerYAnchor.constraint(equalTo: priceLabel.centerYAnchor),
+            addToCartButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+            addToCartButton.widthAnchor.constraint(equalToConstant: 32),
+            addToCartButton.heightAnchor.constraint(equalToConstant: 32)
         ])
     }
 
     func configure(with bike: Bike) {
         currentBike = bike
         nameLabel.text = bike.name
+        descriptionLabel.text = bike.description
         imageView.image = UIImage(systemName: bike.imageSystemName)
 
         if let formatted = Formatting.currency.string(from: bike.price as NSDecimalNumber) {
@@ -234,6 +484,21 @@ final class BikeCell: UICollectionViewCell {
         Task { @MainActor in
             FavoritesStore.shared.toggle(bike.id)
             updateFavoriteButton()
+        }
+    }
+
+    @objc private func addToCart() {
+        guard let bike = currentBike else { return }
+        Task { @MainActor in
+            CartStore.shared.add(bike)
+            // Animate button
+            UIView.animate(withDuration: 0.1, animations: {
+                self.addToCartButton.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
+            }) { _ in
+                UIView.animate(withDuration: 0.1) {
+                    self.addToCartButton.transform = .identity
+                }
+            }
         }
     }
 }

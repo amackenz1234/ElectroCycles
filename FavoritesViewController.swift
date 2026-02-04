@@ -54,16 +54,11 @@ final class FavoritesViewController: UIViewController {
     }
     
     private func loadFavorites() {
-        // Load favorites from UserDefaults or a data store
-        // For now, we'll use a simple approach with UserDefaults
-        let favoriteIds = UserDefaults.standard.array(forKey: "favoriteRoles") as? [String] ?? []
-        
-        // Get all bikes and filter for favorites
-        let allBikes = Catalog.bikes
-        favoriteBikes = allBikes.filter { favoriteIds.contains($0.role) }
-        
-        tableView.reloadData()
-        updateEmptyState()
+        Task { @MainActor in
+            favoriteBikes = FavoritesStore.shared.favoriteBikes
+            tableView.reloadData()
+            updateEmptyState()
+        }
     }
     
     private func updateEmptyState() {
@@ -126,27 +121,23 @@ final class FavoritesViewController: UIViewController {
             message: "Are you sure you want to remove all bikes from your favorites?",
             preferredStyle: .alert
         )
-        
+
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alert.addAction(UIAlertAction(title: "Clear All", style: .destructive) { _ in
-            UserDefaults.standard.removeObject(forKey: "favoriteRoles")
-            self.loadFavorites()
+        alert.addAction(UIAlertAction(title: "Clear All", style: .destructive) { [weak self] _ in
+            Task { @MainActor in
+                FavoritesStore.shared.clear()
+                self?.loadFavorites()
+            }
         })
-        
+
         present(alert, animated: true)
     }
-    
+
     private func toggleFavorite(for bike: Bike) {
-        var favoriteIds = UserDefaults.standard.array(forKey: "favoriteRoles") as? [String] ?? []
-        
-        if let index = favoriteIds.firstIndex(of: bike.role) {
-            favoriteIds.remove(at: index)
-        } else {
-            favoriteIds.append(bike.role)
+        Task { @MainActor in
+            FavoritesStore.shared.toggle(bike)
+            loadFavorites()
         }
-        
-        UserDefaults.standard.set(favoriteIds, forKey: "favoriteRoles")
-        loadFavorites()
     }
 }
 
@@ -160,11 +151,14 @@ extension FavoritesViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FavoriteCell", for: indexPath)
         let bike = favoriteBikes[indexPath.row]
-        
-        cell.textLabel?.text = bike.role
-        cell.detailTextLabel?.text = "$\(bike.price)"
+
+        var config = cell.defaultContentConfiguration()
+        config.text = bike.name
+        config.secondaryText = Formatting.currency.string(from: bike.price as NSDecimalNumber)
+        config.image = UIImage(systemName: bike.imageSystemName)
+        cell.contentConfiguration = config
         cell.accessoryType = .disclosureIndicator
-        
+
         return cell
     }
 }
