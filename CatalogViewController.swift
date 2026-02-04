@@ -130,7 +130,7 @@ final class CatalogViewController: UIViewController {
     }
 
     @objc private func showWhatsNew() {
-        let whatsNewVC = WhatsNewViewController()
+        let whatsNewVC = WhatsNewViewController(version: "1.1")
         let navController = UINavigationController(rootViewController: whatsNewVC)
         present(navController, animated: true)
     }

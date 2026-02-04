@@ -3,12 +3,11 @@
 //  Electro Cycles
 //
 //  Created by Assistant on 2025-09-27.
-//  All app models and stores in one file to avoid scope issues
+//  Shared models and catalog data
 //
 
 import Foundation
 import UIKit
-import Combine
 
 // MARK: - Bike Model
 public struct Bike: Hashable, Identifiable, Codable {
@@ -26,162 +25,6 @@ public struct Bike: Hashable, Identifiable, Codable {
         self.price = price
         self.imageSystemName = imageSystemName
         self.assetImageName = assetImageName
-    }
-}
-
-// MARK: - Cart Item
-public struct CartItem: Codable, Hashable, Identifiable {
-    public let id: UUID
-    public let bike: Bike
-    public var quantity: Int
-    
-    public init(bike: Bike, quantity: Int = 1) {
-        self.id = UUID()
-        self.bike = bike
-        self.quantity = quantity
-    }
-}
-
-// MARK: - Notifications
-public extension Notification.Name {
-    static let cartStoreDidChange = Notification.Name("CartStore.didChange")
-    static let favoritesStoreDidChange = Notification.Name("FavoritesStore.didChange")
-}
-
-// MARK: - Cart Store
-@MainActor
-public final class CartStore: ObservableObject {
-    public static let shared = CartStore()
-    public static let didChange = Notification.Name.cartStoreDidChange
-    
-    private let storageKey = "cart.store.items"
-    @Published private var items: [CartItem] = []
-    
-    private init() {
-        Task { await load() }
-    }
-    
-    public var allItems: [CartItem] { items }
-    public var isEmpty: Bool { items.isEmpty }
-    public var totalPrice: Decimal {
-        items.reduce(0) { total, item in
-            total + (item.bike.price * Decimal(item.quantity))
-        }
-    }
-    
-    public func add(_ bike: Bike, quantity: Int = 1) {
-        if let existingIndex = items.firstIndex(where: { $0.bike.id == bike.id }) {
-            items[existingIndex].quantity += quantity
-        } else {
-            items.append(CartItem(bike: bike, quantity: quantity))
-        }
-        Task { await save() }
-    }
-    
-    public func remove(_ bikeId: UUID) {
-        items.removeAll { $0.bike.id == bikeId }
-        Task { await save() }
-    }
-    
-    public func updateQuantity(for bikeId: UUID, to quantity: Int) {
-        if quantity <= 0 {
-            remove(bikeId)
-            return
-        }
-        if let index = items.firstIndex(where: { $0.bike.id == bikeId }) {
-            items[index].quantity = quantity
-            Task { await save() }
-        }
-    }
-    
-    public func clear() {
-        items.removeAll()
-        Task { await save() }
-    }
-    
-    public func quantity(for bikeId: UUID) -> Int {
-        items.first { $0.bike.id == bikeId }?.quantity ?? 0
-    }
-    
-    private func load() async {
-        if let data = UserDefaults.standard.data(forKey: storageKey),
-           let decoded = try? JSONDecoder().decode([CartItem].self, from: data) {
-            items = decoded
-        }
-    }
-    
-    private func save() async {
-        if let data = try? JSONEncoder().encode(items) {
-            UserDefaults.standard.set(data, forKey: storageKey)
-            await MainActor.run {
-                NotificationCenter.default.post(name: Self.didChange, object: self)
-            }
-        }
-    }
-}
-
-// MARK: - Favorites Store
-@MainActor
-public final class FavoritesStore: ObservableObject {
-    public static let shared = FavoritesStore()
-    public static let didChange = Notification.Name.favoritesStoreDidChange
-    
-    private let storageKey = "favorites.store.bikeIds"
-    @Published private var bikeIds: Set<UUID> = []
-    
-    private init() {
-        Task { await load() }
-    }
-    
-    public var count: Int { bikeIds.count }
-    public var isEmpty: Bool { bikeIds.isEmpty }
-    public var favoriteIds: Set<UUID> { bikeIds }
-    public var favoriteBikes: [Bike] {
-        Catalog.bikes.filter { bikeIds.contains($0.id) }
-    }
-    
-    public func isFavorite(_ bikeId: UUID) -> Bool { bikeIds.contains(bikeId) }
-    public func isFavorite(_ bike: Bike) -> Bool { bikeIds.contains(bike.id) }
-    
-    public func add(_ bikeId: UUID) {
-        bikeIds.insert(bikeId)
-        Task { await save() }
-    }
-    
-    public func add(_ bike: Bike) { add(bike.id) }
-    
-    public func remove(_ bikeId: UUID) {
-        bikeIds.remove(bikeId)
-        Task { await save() }
-    }
-    
-    public func remove(_ bike: Bike) { remove(bike.id) }
-    
-    public func toggle(_ bikeId: UUID) {
-        if bikeIds.contains(bikeId) { remove(bikeId) } else { add(bikeId) }
-    }
-    
-    public func toggle(_ bike: Bike) { toggle(bike.id) }
-    
-    public func clear() {
-        bikeIds.removeAll()
-        Task { await save() }
-    }
-    
-    private func load() async {
-        if let data = UserDefaults.standard.data(forKey: storageKey),
-           let decoded = try? JSONDecoder().decode(Set<UUID>.self, from: data) {
-            bikeIds = decoded
-        }
-    }
-    
-    private func save() async {
-        if let data = try? JSONEncoder().encode(bikeIds) {
-            UserDefaults.standard.set(data, forKey: storageKey)
-            await MainActor.run {
-                NotificationCenter.default.post(name: Self.didChange, object: self)
-            }
-        }
     }
 }
 
