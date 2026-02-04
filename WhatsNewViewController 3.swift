@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class WhatsNewViewController: UIViewController {
+final class WhatsNewScrollViewController: UIViewController {
     
     private let version: String
     var onViewUpdates: (() -> Void)?
