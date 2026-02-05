@@ -18,7 +18,7 @@
                BlueprintIdentifier = "1FC34AA32E87252E00217256"
                BuildableName = "Electro Cycles.app"
                BlueprintName = "Electro Cycles"
-               ReferencedContainer = "container:">
+               ReferencedContainer = "container:Electro Cycles.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -38,7 +38,7 @@
                BlueprintIdentifier = "1FC34AB92E87252F00217256"
                BuildableName = "Electro CyclesTests.xctest"
                BlueprintName = "Electro CyclesTests"
-               ReferencedContainer = "container:">
+               ReferencedContainer = "container:Electro Cycles.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -49,7 +49,7 @@
                BlueprintIdentifier = "1FC34AC32E87252F00217256"
                BuildableName = "Electro CyclesUITests.xctest"
                BlueprintName = "Electro CyclesUITests"
-               ReferencedContainer = "container:">
+               ReferencedContainer = "container:Electro Cycles.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -71,7 +71,7 @@
             BlueprintIdentifier = "1FC34AA32E87252E00217256"
             BuildableName = "Electro Cycles.app"
             BlueprintName = "Electro Cycles"
-            ReferencedContainer = "container:">
+            ReferencedContainer = "container:Electro Cycles.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
@@ -95,7 +95,7 @@
             BlueprintIdentifier = "1FC34AA32E87252E00217256"
             BuildableName = "Electro Cycles.app"
             BlueprintName = "Electro Cycles"
-            ReferencedContainer = "container:">
+            ReferencedContainer = "container:Electro Cycles.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
