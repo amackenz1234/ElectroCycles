@@ -55,40 +55,40 @@ final class CatalogViewController: UIViewController {
                 // Banner section
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(160)
+                    heightDimension: .absolute(180)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
                 let groupSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(160)
+                    heightDimension: .absolute(180)
                 )
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
                 let section = NSCollectionLayoutSection(group: group)
-                section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 20, bottom: 16, trailing: 20)
                 return section
             } else {
                 // Products grid section
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(0.5),
-                    heightDimension: .estimated(300)
+                    heightDimension: .estimated(320)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                item.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 6, bottom: 6, trailing: 6)
+                item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
 
                 let groupSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .estimated(300)
+                    heightDimension: .estimated(320)
                 )
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item, item])
 
                 let section = NSCollectionLayoutSection(group: group)
-                section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 10, bottom: 20, trailing: 10)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 12, bottom: 32, trailing: 12)
 
                 let headerSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(50)
+                    heightDimension: .absolute(56)
                 )
                 let header = NSCollectionLayoutBoundarySupplementaryItem(
                     layoutSize: headerSize,
@@ -313,10 +313,10 @@ final class SectionHeader: UICollectionReusableView {
         addSubview(seeAllButton)
 
         NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 6),
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
             titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
 
-            seeAllButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+            seeAllButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
             seeAllButton.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
     }
@@ -410,7 +410,7 @@ final class BikeCell: UICollectionViewCell {
         addToCartButton.setImage(UIImage(systemName: "cart.badge.plus"), for: .normal)
         addToCartButton.tintColor = .white
         addToCartButton.backgroundColor = .systemRed
-        addToCartButton.layer.cornerRadius = 16
+        addToCartButton.layer.cornerRadius = 17
         addToCartButton.translatesAutoresizingMaskIntoConstraints = false
         addToCartButton.addTarget(self, action: #selector(addToCart), for: .touchUpInside)
         containerView.addSubview(addToCartButton)
@@ -421,37 +421,37 @@ final class BikeCell: UICollectionViewCell {
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
 
-            imageContainerView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
-            imageContainerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
-            imageContainerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
-            imageContainerView.heightAnchor.constraint(equalToConstant: 120),
+            imageContainerView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 14),
+            imageContainerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 14),
+            imageContainerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -14),
+            imageContainerView.heightAnchor.constraint(equalToConstant: 140),
 
             imageView.centerXAnchor.constraint(equalTo: imageContainerView.centerXAnchor),
             imageView.centerYAnchor.constraint(equalTo: imageContainerView.centerYAnchor),
-            imageView.widthAnchor.constraint(equalToConstant: 70),
-            imageView.heightAnchor.constraint(equalToConstant: 70),
+            imageView.widthAnchor.constraint(equalToConstant: 80),
+            imageView.heightAnchor.constraint(equalToConstant: 80),
 
-            favoriteButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
-            favoriteButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            favoriteButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 18),
+            favoriteButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -18),
             favoriteButton.widthAnchor.constraint(equalToConstant: 32),
             favoriteButton.heightAnchor.constraint(equalToConstant: 32),
 
-            nameLabel.topAnchor.constraint(equalTo: imageContainerView.bottomAnchor, constant: 12),
-            nameLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
-            nameLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+            nameLabel.topAnchor.constraint(equalTo: imageContainerView.bottomAnchor, constant: 14),
+            nameLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 14),
+            nameLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -14),
 
-            descriptionLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
-            descriptionLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
-            descriptionLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+            descriptionLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 6),
+            descriptionLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 14),
+            descriptionLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -14),
 
-            priceLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 8),
-            priceLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
-            priceLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -12),
+            priceLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 12),
+            priceLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 14),
+            priceLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -16),
 
             addToCartButton.centerYAnchor.constraint(equalTo: priceLabel.centerYAnchor),
-            addToCartButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
-            addToCartButton.widthAnchor.constraint(equalToConstant: 32),
-            addToCartButton.heightAnchor.constraint(equalToConstant: 32)
+            addToCartButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -14),
+            addToCartButton.widthAnchor.constraint(equalToConstant: 34),
+            addToCartButton.heightAnchor.constraint(equalToConstant: 34)
         ])
     }
 
