@@ -18,7 +18,8 @@ ElectroCycles/
 │   ├── PULL_REQUEST_TEMPLATE.md # PR checklist template
 │   └── workflows/
 │       ├── ios.yml              # Primary CI: build, test, lint (macOS 14)
-│       └── swift.yml            # Fallback: swift build/test
+│       ├── swift.yml            # Fallback: swift build/test
+│       └── testflight.yml      # TestFlight beta deployment
 ├── Assets.xcassets/             # Images, colors, app icon
 ├── xcshareddata/                # Shared Xcode schemes
 ├── project.pbxproj              # Xcode project file
@@ -176,6 +177,33 @@ CODE_SIGN_IDENTITY=""
 CODE_SIGNING_REQUIRED=NO
 CODE_SIGNING_ALLOWED=NO
 ```
+
+### TestFlight Deployment (`.github/workflows/testflight.yml`)
+
+Triggers on push to `main` or manual dispatch (`workflow_dispatch`).
+
+**Pipeline:** Archive with Release config -> Export IPA -> Upload via `xcrun altool`
+
+**Required GitHub Secrets (must be configured before use):**
+
+| Secret | Description |
+|--------|-------------|
+| `APPLE_CERTIFICATE_BASE64` | Base64-encoded `.p12` distribution certificate |
+| `APPLE_CERTIFICATE_PASSWORD` | Password for the `.p12` certificate |
+| `PROVISIONING_PROFILE_BASE64` | Base64-encoded App Store provisioning profile |
+| `PROVISIONING_PROFILE_NAME` | Name of the provisioning profile in Apple Developer portal |
+| `CODE_SIGN_IDENTITY` | Signing identity (e.g., `"Apple Distribution: Your Name (TEAM_ID)"`) |
+| `ASC_KEY_ID` | App Store Connect API key ID |
+| `ASC_ISSUER_ID` | App Store Connect API issuer ID |
+| `ASC_API_KEY` | App Store Connect API private key (`.p8` contents) |
+
+**Setup steps:**
+1. Create an App Store Connect API key at https://appstoreconnect.apple.com/access/integrations/api
+2. Export your distribution certificate as `.p12` and base64-encode it: `base64 -i cert.p12 | pbcopy`
+3. Download your App Store provisioning profile and base64-encode it: `base64 -i profile.mobileprovision | pbcopy`
+4. Add all secrets to GitHub repository Settings > Secrets and variables > Actions
+
+Build numbers auto-increment using `github.run_number`. The IPA is also uploaded as a GitHub artifact for 30 days.
 
 ## PR Workflow
 
