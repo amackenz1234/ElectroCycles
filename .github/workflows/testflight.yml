@@ -35,6 +35,9 @@ jobs:
     - name: Show Xcode version
       run: xcodebuild -version
 
+    - name: Create xcodeproj symlink
+      run: ln -sfn "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE.xcodeproj"
+
     # ──────────────────────────────────────────────
     # Code Signing Setup
     # ──────────────────────────────────────────────
@@ -78,11 +81,9 @@ jobs:
     - name: Increment build number
       run: |
         BUILD_NUMBER=${{ github.run_number }}
-        XCPROJ=$(find . -name '*.xcodeproj' -maxdepth 1 | head -1)
-        PLIST_PATH="Info.plist"
 
         # Update build number in Info.plist
-        /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST_PATH"
+        /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "Info.plist"
 
         echo "Build number set to: $BUILD_NUMBER"
 
@@ -92,10 +93,8 @@ jobs:
 
     - name: Archive app
       run: |
-        XCPROJ=$(find . -name '*.xcodeproj' -maxdepth 1 | head -1)
-
         xcodebuild archive \
-          -project "$XCPROJ" \
+          -project "$GITHUB_WORKSPACE.xcodeproj" \
           -scheme "$SCHEME" \
           -destination "generic/platform=iOS" \
           -configuration Release \

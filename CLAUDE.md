@@ -49,11 +49,18 @@ ElectroCycles/
 
 ## Build & Run Commands
 
+**Important:** The repo root IS the `.xcodeproj` bundle (it contains `project.pbxproj` directly). Since the directory isn't named with a `.xcodeproj` extension, you must create a symlink before running `xcodebuild`:
+
+```bash
+# Run once (idempotent) — creates ElectroCycles.xcodeproj symlink in parent dir
+ln -sfn "$(pwd)" "$(pwd).xcodeproj"
+```
+
 ### Build (simulator, no code signing)
 
 ```bash
 xcodebuild build \
-  -project "$(find . -name '*.xcodeproj' -maxdepth 1 | head -1)" \
+  -project "$(pwd).xcodeproj" \
   -scheme "Electro Cycles" \
   -destination "generic/platform=iOS Simulator" \
   -configuration Debug \
@@ -67,7 +74,7 @@ xcodebuild build \
 
 ```bash
 xcodebuild test \
-  -project "$(find . -name '*.xcodeproj' -maxdepth 1 | head -1)" \
+  -project "$(pwd).xcodeproj" \
   -scheme "Electro Cycles" \
   -destination "platform=iOS Simulator,name=iPhone 15" \
   -configuration Debug \
