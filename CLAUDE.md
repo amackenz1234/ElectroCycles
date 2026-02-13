@@ -12,55 +12,57 @@ ElectroCycles (display name: "Electro Cycles") is a native iOS e-bike shopping a
 ## Repository Structure
 
 ```
-ElectroCycles/
+ElectroCycles/                          # Repository root
 ├── .github/
-│   ├── ISSUE_TEMPLATE/          # Bug report & feature request templates
-│   ├── PULL_REQUEST_TEMPLATE.md # PR checklist template
+│   ├── ISSUE_TEMPLATE/                 # Bug report & feature request templates
+│   ├── PULL_REQUEST_TEMPLATE.md        # PR checklist template
 │   └── workflows/
-│       ├── ios.yml              # Primary CI: build, test, lint (macOS 14)
-│       ├── swift.yml            # Fallback: swift build/test
-│       └── testflight.yml      # TestFlight beta deployment
-├── Assets.xcassets/             # Images, colors, app icon
-├── xcshareddata/                # Shared Xcode schemes
-├── project.pbxproj              # Xcode project file
-├── Info.plist                   # App configuration
-├── LaunchScreen.storyboard      # Launch screen (only storyboard)
-├── ElectroCycles.entitlements   # Apple Pay entitlements
+│       ├── ios.yml                     # Primary CI: build, test, lint (macOS 14)
+│       ├── swift.yml                   # Fallback: swift build/test
+│       └── testflight.yml             # TestFlight beta deployment
 │
-├── AppDelegate.swift            # App lifecycle, appearance config
-├── SceneDelegate.swift          # Window/scene setup
-├── MainTabBarController.swift   # Root tab bar (Shop, Favorites, Cart, Orders)
+├── Electro Cycles.xcodeproj/           # Xcode project bundle
+│   ├── project.pbxproj                 # Xcode project file
+│   ├── project.xcworkspace/            # Workspace data
+│   └── xcshareddata/                   # Shared schemes
 │
-├── AppModels.swift              # Bike model, Catalog data, Formatting utilities
-├── ElectroCyclesTypes.swift     # Type aliases for cross-module access
+├── Electro Cycles/                     # App source directory
+│   ├── Assets.xcassets/                # Images, colors, app icon
+│   ├── Info.plist                      # App configuration
+│   ├── LaunchScreen.storyboard         # Launch screen (only storyboard)
+│   ├── Electro Cycles.entitlements     # Apple Pay entitlements
+│   │
+│   ├── AppDelegate.swift               # App lifecycle, appearance config
+│   ├── SceneDelegate.swift             # Window/scene setup
+│   ├── MainTabBarController.swift      # Root tab bar (Shop, Favorites, Cart, Orders)
+│   │
+│   ├── AppModels.swift                 # Bike model, Catalog data, Formatting utilities
+│   ├── ElectroCyclesTypes.swift        # Type aliases for cross-module access
+│   │
+│   ├── CatalogViewController.swift     # Product grid with compositional layout
+│   ├── BikeDetailViewController.swift  # Product detail with Add to Cart / Apple Pay
+│   ├── CartViewController.swift        # Shopping cart with quantity editing
+│   ├── FavoritesViewController.swift   # Favorited bikes list
+│   ├── OrdersViewController.swift      # Order history with status tracking
+│   ├── WhatsNewViewController.swift    # What's New modal (+ variants 2, 3)
+│   │
+│   ├── CartStore.swift                 # Cart state management (singleton)
+│   ├── FavoritesStore.swift            # Favorites state management (singleton)
+│   ├── OrdersStore.swift               # Orders state management (singleton)
+│   └── ApplePayManager.swift           # Apple Pay payment flow (singleton)
 │
-├── CatalogViewController.swift  # Product grid with compositional layout
-├── BikeDetailViewController.swift # Product detail with Add to Cart / Apple Pay
-├── CartViewController.swift     # Shopping cart with quantity editing
-├── FavoritesViewController.swift # Favorited bikes list
-├── OrdersViewController.swift   # Order history with status tracking
-├── WhatsNewViewController.swift # What's New modal (+ variants 2, 3)
-│
-├── CartStore.swift              # Cart state management (singleton)
-├── FavoritesStore.swift         # Favorites state management (singleton)
-├── OrdersStore.swift            # Orders state management (singleton)
-└── ApplePayManager.swift        # Apple Pay payment flow (singleton)
+└── CLAUDE.md
 ```
 
 ## Build & Run Commands
 
-**Important:** The repo root IS the `.xcodeproj` bundle (it contains `project.pbxproj` directly). Since the directory isn't named with a `.xcodeproj` extension, you must create a symlink before running `xcodebuild`:
-
-```bash
-# Run once (idempotent) — creates ElectroCycles.xcodeproj symlink in parent dir
-ln -sfn "$(pwd)" "$(pwd).xcodeproj"
-```
+All commands should be run from the repository root.
 
 ### Build (simulator, no code signing)
 
 ```bash
 xcodebuild build \
-  -project "$(pwd).xcodeproj" \
+  -project "Electro Cycles.xcodeproj" \
   -scheme "Electro Cycles" \
   -destination "generic/platform=iOS Simulator" \
   -configuration Debug \
@@ -74,7 +76,7 @@ xcodebuild build \
 
 ```bash
 xcodebuild test \
-  -project "$(pwd).xcodeproj" \
+  -project "Electro Cycles.xcodeproj" \
   -scheme "Electro Cycles" \
   -destination "platform=iOS Simulator,name=iPhone 15" \
   -configuration Debug \
@@ -154,14 +156,14 @@ The app follows a UIKit MVC pattern enhanced with observable singleton stores fo
 - Controllers use `final class` modifier
 - Use SF Symbols for icons (e.g., `"bicycle"`, `"cart"`, `"heart"`, `"shippingbox"`)
 - Dark mode support via system semantic colors (`.systemBackground`, `.label`, `.secondaryLabel`, etc.)
-- All source files live in the project root (flat structure, no `Sources/` subdirectory)
+- All source files live in the `Electro Cycles/` directory (flat structure within that directory)
 
 ### Things to Avoid
 
 - Do not add third-party dependencies (CocoaPods, SPM, Carthage) — the project is deliberately dependency-free
 - Do not introduce SwiftUI views — the project is UIKit-only
 - Do not add storyboard files — all UI is programmatic
-- Do not modify `project.pbxproj` by hand unless adding/removing files from the Xcode project
+- Do not modify `Electro Cycles.xcodeproj/project.pbxproj` by hand unless adding/removing files from the Xcode project
 
 ## CI/CD
 

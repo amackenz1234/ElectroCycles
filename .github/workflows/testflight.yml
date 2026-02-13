@@ -35,9 +35,6 @@ jobs:
     - name: Show Xcode version
       run: xcodebuild -version
 
-    - name: Create xcodeproj symlink
-      run: ln -sfn "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE.xcodeproj"
-
     # ──────────────────────────────────────────────
     # Code Signing Setup
     # ──────────────────────────────────────────────
@@ -83,7 +80,7 @@ jobs:
         BUILD_NUMBER=${{ github.run_number }}
 
         # Update build number in Info.plist
-        /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "Info.plist"
+        /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "Electro Cycles/Info.plist"
 
         echo "Build number set to: $BUILD_NUMBER"
 
@@ -94,7 +91,7 @@ jobs:
     - name: Archive app
       run: |
         xcodebuild archive \
-          -project "$GITHUB_WORKSPACE.xcodeproj" \
+          -project "Electro Cycles.xcodeproj" \
           -scheme "$SCHEME" \
           -destination "generic/platform=iOS" \
           -configuration Release \
